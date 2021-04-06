@@ -1,0 +1,250 @@
+---
+title: "Differential Impact of COVID-19 Pandemic on Surveillance of Campylobacter and Norovirus in England"
+author: "Nikola Ondrikova"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(MASS)
+library(tscount)
+library(dplyr)
+library(ggpubr)
+
+
+options(scipen = 999)
+#setwd('Location_on_your_machine/Diff-COVID19-Impact-on-GI/')
+source('./Src/custom_functions.R')
+
+#import prepared data files
+outcome_df <- read.csv("./Data/outcomes_min5.csv", sep="")
+noro_vars <- read.csv("./Data/noro_vars.csv", sep="")
+campy_vars <- read.csv("./Data/campy_vars.csv", sep="")
+
+## transform norovirus and campylobacter into time series
+noro_ts = ts(outcome_df$norovirus, start = c(2015,27), 
+             end = c(2020, 43), frequency = 52.2)
+campy_ts = ts(outcome_df$campylobacter, start = c(2015,27),#c(2015,40), 
+             end = c(2020, 43), frequency = 52.2)
+
+## helper variables
+WEEK11 = 246
+WEEK12 = 247
+
+
+```
+
+
+### Norovirus - Specific Impact
+
+```{r noro I, echo=FALSE}
+
+noro_specific_fit <- NbinomTsglm(outcome_ts = noro_ts,
+                                 predictors = noro_vars)
+
+print(scoring(noro_specific_fit)[c(1,4,6)])
+summary(noro_specific_fit, B = 500)
+plot(noro_specific_fit)
+
+```
+
+
+### Norovirus - Overall Impact
+
+```{r noro II, echo=FALSE}
+
+
+noro_overall_fit <- NbinomTsglm(outcome_ts = noro_ts,
+                                predictors = noro_vars[,3:10]) # without covid vars
+
+noro_intervtest11 <-c()
+for (i in c(0.80,0.85,0.90,1)){
+  set.seed(12890)
+  noro_intervtest11[[as.character(i)]] <- interv_test(fit=noro_overall_fit, 
+                                                       tau=WEEK11, 
+                                                       delta = i, 
+                                                       est_interv=TRUE)
+}
+deltas_char = names(noro_intervtest11)
+cat('WEEK 11:', '\n')
+for (i in seq(1,4)) {
+  cat('--------------------------------', '\n')
+  cat('delta', deltas_char[i], '\n')
+  cat('coef: ',noro_intervtest11[[i]]$fit_interv$coefficients['interv_1'],
+      'p: ', noro_intervtest11[[i]]$p_value, 
+      ' AIC: ',AIC(noro_intervtest11[[i]]$fit_interv),'\n')
+  print(scoring(noro_intervtest11[[i]]$fit_interv)[c(1,4,6)])
+}
+
+noro_intervtest12 <-c()
+for (i in c(0.80,0.85,0.90,1)){
+  set.seed(12890)
+  noro_intervtest12[[as.character(i)]] <- interv_test(fit=noro_overall_fit, 
+                                                       tau=WEEK12, 
+                                                       delta = i, 
+                                                       est_interv=TRUE)
+}
+
+
+
+cat('WEEK 12:', '\n')
+for (i in seq(1,4)) {
+  cat('--------------------------------', '\n')
+  cat('delta', deltas_char[i], '\n')
+  cat('coef: ',noro_intervtest12[[i]]$fit_interv$coefficients['interv_1'],
+      ' p: ', noro_intervtest12[[i]]$p_value, 
+      ' AIC: ',AIC(noro_intervtest12[[i]]$fit_interv),'\n')
+  print(scoring(noro_intervtest12[[i]]$fit_interv)[c(1,4,6)])
+}
+
+
+noro_intervtest13 <-c()
+for (i in c(0.80,0.85,0.90,1)){
+  set.seed(12890)
+  noro_intervtest13[[as.character(i)]] <- interv_test(fit=noro_overall_fit, 
+                                                       tau=WEEK12+1, 
+                                                       delta = i, 
+                                                       est_interv=TRUE)
+}
+
+
+cat('WEEK 13:', '\n')
+for (i in seq(1,4)) {
+  cat('--------------------------------', '\n')
+  cat('delta', deltas_char[i], '\n')
+  cat('coef: ',noro_intervtest13[[i]]$fit_interv$coefficients['interv_1'],
+      ' p: ', noro_intervtest13[[i]]$p_value, 
+      ' AIC: ',AIC(noro_intervtest13[[i]]$fit_interv),'\n')
+  print(scoring(noro_intervtest13[[i]]$fit_interv)[c(1,4,6)])
+}
+
+
+
+summary(noro_intervtest12[[4]]$fit_interv, B=500)
+plot(noro_intervtest12[[4]]$fit_interv)
+
+```
+
+
+
+```{r noro_plot, echo=FALSE}
+dateseqs = DateSeqs(start='2015-6-29',intervention='2020-3-16',end='2020-10-25')
+
+prepared_data = WouldHaveBeenPlotPrep(outcome_ts = noro_ts, 
+                                      predictors = noro_vars[,3:10], 
+                                      start = WEEK12, 
+                                      nahead = 32, 
+                                      dateseqs = dateseqs)
+
+noro_ggp = WouldHaveBeenPlot(prepared_data, taili = 52)
+
+
+```
+
+
+### Campylobacter - Specific Impact
+
+```{r campy I, echo=FALSE}
+
+
+campy_specific_fit <- NbinomTsglm(outcome_ts = campy_ts[1:278],
+                                 predictors = campy_vars[1:278,1:10])
+
+print(scoring(campy_specific_fit)[c(1,4,6)])
+summary(campy_specific_fit, B = 500)
+plot(campy_specific_fit)
+
+```
+
+### Campylobacter - Overall Impact
+
+```{r campy II, echo=FALSE}
+
+
+campy_overall_fit <- NbinomTsglm(outcome_ts = campy_ts,
+                                predictors = campy_vars[,3:10]) # without covid vars
+
+campy_intervtest11 <-c()
+for (i in c(0.80,0.85,0.90,1)){
+  set.seed(12890)
+  campy_intervtest11[[as.character(i)]] <- interv_test(fit=campy_overall_fit, 
+                                                       tau=WEEK11, 
+                                                       delta = i,
+                                                       est_interv=TRUE)
+}
+deltas_char = names(campy_intervtest11)
+cat('WEEK 11:', '\n')
+for (i in seq(1,4)) {
+  cat('--------------------------------', '\n')
+  cat('delta', deltas_char[i], '\n')
+  cat('coef: ',campy_intervtest11[[i]]$fit_interv$coefficients['interv_1'],
+      ' p: ', campy_intervtest11[[i]]$p_value, 
+      ' AIC: ',AIC(campy_intervtest11[[i]]$fit_interv),'\n')
+  print(scoring(campy_intervtest11[[i]]$fit_interv)[c(1,4,6)])
+}
+
+campy_intervtest12 <-c()
+for (i in c(0.80,0.85,0.90,1)){
+  set.seed(12890)
+  campy_intervtest12[[as.character(i)]] <- interv_test(fit=campy_overall_fit, 
+                                                       tau=WEEK12, 
+                                                       delta = i, 
+                                                       est_interv=TRUE)
+}
+
+cat('WEEK 12:', '\n')
+for (i in seq(1,4)) {
+  cat('--------------------------------', '\n')
+  cat('delta', deltas_char[i], '\n')
+  cat('coef: ',campy_intervtest12[[i]]$fit_interv$coefficients['interv_1'],
+      ' p: ', campy_intervtest12[[i]]$p_value, 
+      ' AIC: ',AIC(campy_intervtest12[[i]]$fit_interv),'\n')
+  print(scoring(campy_intervtest12[[i]]$fit_interv)[c(1,4,6)])
+}
+
+
+campy_intervtest13 <-c()
+for (i in c(0.80,0.85,0.90,1)){
+  set.seed(12890)
+  campy_intervtest13[[as.character(i)]] <- interv_test(fit=campy_overall_fit, 
+                                                       tau=WEEK12+1, 
+                                                       delta = i, 
+                                                       est_interv=TRUE)
+}
+
+cat('WEEK 13:', '\n')
+for (i in seq(1,4)) {
+  cat('--------------------------------', '\n')
+  cat('delta', deltas_char[i], '\n')
+  cat('coef: ',campy_intervtest13[[i]]$fit_interv$coefficients['interv_1'],
+      ' p: ', campy_intervtest13[[i]]$p_value, 
+      ' AIC: ',AIC(campy_intervtest13[[i]]$fit_interv),'\n')
+  print(scoring(campy_intervtest13[[i]]$fit_interv)[c(1,4,6)])
+}
+
+summary(campy_intervtest12[[2]]$fit_interv, B=500)
+plot(campy_intervtest12[[2]]$fit_interv)
+
+```
+
+
+```{r campy plot, echo=FALSE}
+dateseqs = DateSeqs(start='2015-6-29',intervention='2020-3-16',end='2020-10-25')
+
+prepared_data = WouldHaveBeenPlotPrep(outcome_ts = campy_ts, 
+                                      predictors = campy_vars[,3:10], 
+                                      start = WEEK12, 
+                                      nahead = 32,
+                                      dateseqs = dateseqs)
+
+campy_ggp = WouldHaveBeenPlot(prepared_data, taili = 52)#104 - past 2 yrs
+
+figure <- ggarrange(noro_ggp, campy_ggp,
+                    labels = c("N", "C"),
+                    common.legend = TRUE,
+                    ncol = 1, nrow = 2)
+
+print(figure)
+  
+  
+```

@@ -11,7 +11,7 @@ Contains R code supporting publication titled "Differential Impact of COVID-19 P
 
 * Clone/download the repository.<br>
 ```
-git clone https://github.com/NikolaOndrikova/Diff-COVID19-Impact-on-GI.git
+git clone 'https://github.com/NikolaOndrikova/Diff-COVID19-Impact-on-GI.git'
 ```
 * Set your working directory from R/RStudio.<br>
 ```
@@ -19,13 +19,13 @@ setwd('Location_on_your_machine/Diff-COVID19-Impact-on-GI/')
 ```
 * Knit main_report.Rmd from R/RStudio.<br>
 ```
-rmarkdown::render("./main_report.Rmd")
+rmarkdown::render('./main_report.Rmd')
 ```
 
-**Note:** In some weeks, the number of norovirus reports was <5; these values were changed to 5 due to privacy reasons.
+**Note:** In this repository, dummy data are used instead of the raw laboratory reports of norovirus and Campylobacter due to data policy of Public Health England. Raw data are available upon reasonable request from EEDD@phe.gov.uk. 
 
 
 ### References
 Liboschik, T., Fokianos, K. and Fried, R. (2017). tscount: An R package for analysis of count
 time series following generalized linear models. Journal of Statistical Software 82(5), 1–51, doi:
-10.18637/jss.v082.i05.
+[10.18637/jss.v082.i05](https://www.jstatsoft.org/article/view/v082i05).

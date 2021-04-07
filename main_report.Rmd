@@ -17,7 +17,7 @@ options(scipen = 999)
 source('./Src/custom_functions.R')
 
 #import prepared data files
-outcome_df <- read.csv("./Data/outcomes_min5.csv", sep="")
+outcome_df <- read.csv("./Data/dummy_outcomes.csv", sep="")
 noro_vars <- read.csv("./Data/noro_vars.csv", sep="")
 campy_vars <- read.csv("./Data/campy_vars.csv", sep="")
 

@@ -22,7 +22,7 @@ setwd('Location_on_your_machine/Diff-COVID19-Impact-on-GI/')
 rmarkdown::render('./main_report.Rmd')
 ```
 
-**Note:** In this repository, dummy data are used instead of the raw laboratory reports of norovirus and Campylobacter due to data policy of Public Health England. Raw data are available upon reasonable request from EEDD@phe.gov.uk. 
+**Note:** In this repository, dummy data are used instead of the raw laboratory reports of norovirus and Campylobacter due to data sharing policy of Public Health England. Raw data are available upon reasonable request from EEDD@phe.gov.uk. 
 
 
 ### References

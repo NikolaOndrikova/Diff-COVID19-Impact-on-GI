@@ -17,9 +17,9 @@ options(scipen = 999)
 source('./Src/custom_functions.R')
 
 #import prepared data files
-outcome_df <- read.csv("./Data/dummy_outcomes.csv", sep="")
-noro_vars <- read.csv("./Data/noro_vars.csv", sep="")
-campy_vars <- read.csv("./Data/campy_vars.csv", sep="")
+outcome_df <- read.csv("./Data/synth_outcomes.csv", sep="")
+noro_vars <- read.csv("./Data/noro_vars_synthseason.csv", sep="")
+campy_vars <- read.csv("./Data/campy_vars_synthseason.csv", sep="")
 
 ## transform norovirus and campylobacter into time series
 noro_ts = ts(outcome_df$norovirus, start = c(2015,27), 
@@ -35,18 +35,7 @@ WEEK12 = 247
 ```
 
 
-### Norovirus - Specific Impact
 
-```{r noro I, echo=FALSE}
-
-noro_specific_fit <- NbinomTsglm(outcome_ts = noro_ts,
-                                 predictors = noro_vars)
-
-print(scoring(noro_specific_fit)[c(1,4,6)])
-summary(noro_specific_fit, B = 500)
-plot(noro_specific_fit)
-
-```
 
 
 ### Norovirus - Overall Impact
@@ -141,20 +130,23 @@ noro_ggp = WouldHaveBeenPlot(prepared_data, taili = 52)
 
 ```
 
+### Norovirus - Specific Impact
 
-### Campylobacter - Specific Impact
+```{r noro I, echo=FALSE}
 
-```{r campy I, echo=FALSE}
+noro_vars_ = cbind(noro_vars,
+                    interv_1 = noro_intervtest12[[4]]$xreg_interv['interv_1'])
 
+noro_specific_fit <- NbinomTsglm(outcome_ts = noro_ts,
+                                 predictors = noro_vars_)
 
-campy_specific_fit <- NbinomTsglm(outcome_ts = campy_ts[1:278],
-                                 predictors = campy_vars[1:278,1:10])
-
-print(scoring(campy_specific_fit)[c(1,4,6)])
-summary(campy_specific_fit, B = 500)
-plot(campy_specific_fit)
+print(scoring(noro_specific_fit)[c(1,4,6)])
+summary(noro_specific_fit, B = 500)
+plot(noro_specific_fit)
 
 ```
+
+
 
 ### Campylobacter - Overall Impact
 
@@ -224,6 +216,21 @@ for (i in seq(1,4)) {
 
 summary(campy_intervtest12[[2]]$fit_interv, B=500)
 plot(campy_intervtest12[[2]]$fit_interv)
+
+```
+
+### Campylobacter - Specific Impact
+
+```{r campy I, echo=FALSE}
+campy_vars_ = cbind(campy_vars[1:278,1:10],
+                    interv_1 = campy_intervtest12[[2]]$xreg_interv['interv_1'])
+
+campy_specific_fit <- NbinomTsglm(outcome_ts = campy_ts[1:278],
+                                 predictors = campy_vars_)
+
+print(scoring(campy_specific_fit)[c(1,4,6)])
+summary(campy_specific_fit, B = 500)
+plot(campy_specific_fit)
 
 ```
 

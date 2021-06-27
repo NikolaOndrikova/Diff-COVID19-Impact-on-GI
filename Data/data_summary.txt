@@ -1,0 +1,7 @@
+   norovirus     campylobacter       Sarscov2       Stringency_lag1    mean_temp_lag1  
+ Min.   :  3.0   Min.   : 220.0   Min.   :-20.719   Min.   :-13.2286   Min.   :-1.071  
+ 1st Qu.: 46.0   1st Qu.: 801.5   1st Qu.:  0.000   1st Qu.:  0.0000   1st Qu.: 6.871  
+ Median : 90.0   Median : 969.5   Median :  0.000   Median :  0.0000   Median :11.057  
+ Mean   :107.3   Mean   :1006.8   Mean   :  1.677   Mean   :  0.2365   Mean   :10.862  
+ 3rd Qu.:164.8   3rd Qu.:1197.2   3rd Qu.:  0.000   3rd Qu.:  0.0000   3rd Qu.:14.946  
+ Max.   :316.0   Max.   :1823.0   Max.   : 64.306   Max.   : 53.1757   Max.   :20.714  
